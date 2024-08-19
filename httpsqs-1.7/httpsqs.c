@@ -458,6 +458,8 @@ void httpsqs_handler(struct evhttp_request *req, void *arg) {
                         httpsqs_input_postbuffer = urldecode(buffer_data);
                         tcbdbput2(httpsqs_db_tcbdb, queue_name,
                                   httpsqs_input_postbuffer);
+                        log_message("[put][%s] %s", queue_name,
+                                    httpsqs_input_postbuffer);
                         memset(queue_name, '\0', 300);
                         sprintf(queue_name, "%d", queue_put_value);
                         evhttp_add_header(req->output_headers, "Pos",
@@ -487,6 +489,8 @@ void httpsqs_handler(struct evhttp_request *req, void *arg) {
                         httpsqs_input_postbuffer = urldecode(buffer_data);
                         tcbdbput2(httpsqs_db_tcbdb, queue_name,
                                   httpsqs_input_postbuffer);
+                        log_message("[put][%s] %s", queue_name,
+                                    httpsqs_input_postbuffer);
                         memset(queue_name, '\0', 300);
                         sprintf(queue_name, "%d", queue_put_value);
                         evhttp_add_header(req->output_headers, "Pos",
@@ -523,6 +527,8 @@ void httpsqs_handler(struct evhttp_request *req, void *arg) {
                         evhttp_add_header(req->output_headers, "Pos",
                                           queue_name);
                         evbuffer_add_printf(buf, "%s", httpsqs_output_value);
+                        log_message("[get][%s] %s", queue_name,
+                                    httpsqs_output_value);
                         free(httpsqs_output_value);
                     } else {
                         evbuffer_add_printf(buf, "%s", "HTTPSQS_GET_END");
