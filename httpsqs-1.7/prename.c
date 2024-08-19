@@ -1,75 +1,70 @@
 /*
-ÓÃÓÚ½ø³ÌÖØÃüÃû£¬Ö÷½ø³Ì¡¢×Ó½ø³ÌÊ¹ÓÃ²»Í¬µÄÃüÁî£¬±ãÓÚÃüÁîps -ef²é¿´¡£
+ç”¨äºè¿›ç¨‹é‡å‘½åï¼Œä¸»è¿›ç¨‹ã€å­è¿›ç¨‹ä½¿ç”¨ä¸åŒçš„å‘½ä»¤ï¼Œä¾¿äºå‘½ä»¤ps -efæŸ¥çœ‹ã€‚
 */
 
-#include <unistd.h>
-#include <stdio.h>
 #include <stdarg.h>
-#include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
-# define MAXLINE 2048
+#define MAXLINE 2048
 
 #ifdef Linux
-  #include <sys/prctl.h>
+#include <sys/prctl.h>
 #endif
 
 extern char **environ;
 
-static char                **g_main_Argv = NULL;                /* pointer to argument vector */
-static char                *g_main_LastArgv = NULL;        /* end of argv */
+static char **g_main_Argv = NULL;    /* pointer to argument vector */
+static char *g_main_LastArgv = NULL; /* end of argv */
 
-void prename_setproctitle_init(int argc, char **argv, char **envp)
-{
-    int i;
+void prename_setproctitle_init(int argc, char **argv, char **envp) {
+  int i;
 
-    for (i = 0; envp[i] != NULL; i++)
-        continue;
-    environ = (char **) malloc(sizeof (char *) * (i + 1));
-    for (i = 0; envp[i] != NULL; i++)
-        environ[i] = strdup(envp[i]);//xstrdup(envp[i]);
-    environ[i] = NULL;
+  for (i = 0; envp[i] != NULL; i++)
+    continue;
+  environ = (char **)malloc(sizeof(char *) * (i + 1));
+  for (i = 0; envp[i] != NULL; i++)
+    environ[i] = strdup(envp[i]); // xstrdup(envp[i]);
+  environ[i] = NULL;
 
-    g_main_Argv = argv;
-    if (i > 0)
-      g_main_LastArgv = envp[i - 1] + strlen(envp[i - 1]);
-    else
-      g_main_LastArgv = argv[argc - 1] + strlen(argv[argc - 1]);
+  g_main_Argv = argv;
+  if (i > 0)
+    g_main_LastArgv = envp[i - 1] + strlen(envp[i - 1]);
+  else
+    g_main_LastArgv = argv[argc - 1] + strlen(argv[argc - 1]);
 }
 
-void prename_setproctitle(const char *fmt, ...)
-{
-        char *p;
-        int i;
-        char buf[MAXLINE];
+void prename_setproctitle(const char *fmt, ...) {
+  char *p;
+  int i;
+  char buf[MAXLINE];
 
-        extern char **g_main_Argv;
-        extern char *g_main_LastArgv;
-    va_list ap;
-        p = buf;
+  extern char **g_main_Argv;
+  extern char *g_main_LastArgv;
+  va_list ap;
+  p = buf;
 
-    va_start(ap, fmt);
-        vsprintf(p, fmt, ap);
-        va_end(ap);
+  va_start(ap, fmt);
+  vsprintf(p, fmt, ap);
+  va_end(ap);
 
+  i = strlen(buf);
 
-        i = strlen(buf);
-
-        if (i > g_main_LastArgv - g_main_Argv[0] - 2)
-        {
-                i = g_main_LastArgv - g_main_Argv[0] - 2;
-                buf[i] = '\0';
-        }
-        (void) strcpy(g_main_Argv[0], buf);
-        p = &g_main_Argv[0][i];
-        while (p < g_main_LastArgv)
-                *p++ = '\0';//SPT_PADCHAR;
-        g_main_Argv[1] = NULL;
+  if (i > g_main_LastArgv - g_main_Argv[0] - 2) {
+    i = g_main_LastArgv - g_main_Argv[0] - 2;
+    buf[i] = '\0';
+  }
+  (void)strcpy(g_main_Argv[0], buf);
+  p = &g_main_Argv[0][i];
+  while (p < g_main_LastArgv)
+    *p++ = '\0'; // SPT_PADCHAR;
+  g_main_Argv[1] = NULL;
 
 #ifdef Linux
-     prctl(PR_SET_NAME,buf);
+  prctl(PR_SET_NAME, buf);
 #endif
-
 }
 
 /*
@@ -77,7 +72,8 @@ int main(int argc, char *argv[], char *envp[])
 {
     prename_setproctitle_init(argc, argv, envp);
 
-    prename_setproctitle("%s@%s", "test_very_long_user_name_in_process_name", "192.168.123.145");
+    prename_setproctitle("%s@%s", "test_very_long_user_name_in_process_name",
+"192.168.123.145");
 
     while(1)
         sleep(10);
